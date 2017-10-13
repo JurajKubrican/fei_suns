@@ -1,0 +1,9 @@
+cache
+dataset
+lfw-deepfunneled
+notMNIST_small
+notMNIST_large
+.idea
+*.tar
+*.tgz
+git pull
