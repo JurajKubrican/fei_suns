@@ -6,23 +6,23 @@ import numpy as np
 import pickle
 
 depth = 255.0
-source_dir = "notMNIST_small/"
 source_dir = "notMNIST_large/"
+source_dir = "notMNIST_small/"
 source_dir = "lfw-deepfunneled/"
-cache_dir = 'cache/'
+base_cache_dir = 'cache/'
+cache_dir = base_cache_dir + source_dir
 output_dir = 'dataset/'
 
 # must add to 1
-train = 0.4
-test = 0.4
-valid = 0.2
+train = 0.04
+test = 0.04
+valid = 0.01
 
 numlabels = 0
 
 if not os.path.exists(cache_dir):
     os.makedirs(cache_dir)
 
-cache_dir = cache_dir + source_dir
 
 if not os.path.exists(cache_dir):
     os.makedirs(cache_dir)
@@ -76,15 +76,13 @@ def letter_pickle_preview():
 
 # letter_pickle_preview()
 
-
-# PICKE ALL TO ONE
-def pickle_letters_to_dataset():
-    if(os.path.exists(output_dir + source_dir.replace('/', '') + '.pickle')):
+def pickle_join_labels():
+    if (os.path.exists(base_cache_dir + source_dir.replace('/', '') + '_labels.pickle')):
         return
+
 
     all_data = []
     all_labels = []
-
     print('start dataset creation')
     dirs = os.scandir(cache_dir)
     for filename in dirs:
@@ -95,24 +93,41 @@ def pickle_letters_to_dataset():
         labels = np.repeat(np.atleast_1d(label), len(pickle_data), axis=0)
         all_labels.extend(labels)
 
+        print('dumping')
+    pickle.dump(all_data, open(base_cache_dir + source_dir.replace('/', '') + '_data.pickle', 'wb'))
+    pickle.dump(all_labels, open(base_cache_dir + source_dir.replace('/', '') + '_labels.pickle', 'wb'))
+
+pickle_join_labels()
+
+# PICKE ALL TO ONE
+def pickle_letters_to_dataset():
+    if(os.path.exists(output_dir + source_dir.replace('/', '') + '.pickle')):
+        return
+
+    print('reading')
+    all_data = pickle.load(open(base_cache_dir + source_dir.replace('/', '') + '_data.pickle', 'rb'))
+    all_labels = pickle.load(open(base_cache_dir + source_dir.replace('/', '') + '_labels.pickle', 'rb'))
+    print('read')
+
     data_size = len(all_labels)
     permutation = np.random.permutation(data_size)
 
     print('randomizing: ')
-    all_data = np.asarray(all_data)[permutation]
-    all_labels = np.asarray(all_labels)[permutation]
+    all_data = np.asarray(all_data)
+    print('d1')
+    all_data = all_data[permutation]
+    print('d2')
+    all_labels = np.asarray(all_labels)
+    all_labels = all_labels[permutation]
 
-    print('train. ')
+    print('splitting')
     train_data = all_data[:int(train * data_size), :, :]
     train_labels = all_labels[:int(train * data_size)]
-
-    print('test. ')
     test_data = all_data[(int(train * data_size) + 1):(int((train + test) * data_size)), :, :]
     test_labels = all_data[(int(train * data_size) + 1):(int((train + test) * data_size))]
-
-    print('valid. ')
     valid_data = all_data[(int((train + test) * data_size) + 1): data_size, :, :]
     valid_labels = all_data[(int(((train + test) * data_size)) + 1):data_size]
+
 
     all_pickle = {
         'train_data': train_data,
@@ -121,8 +136,9 @@ def pickle_letters_to_dataset():
         'test_labels': test_labels,
         'valid_data': valid_data,
         'valid_labels': valid_labels,
-    }   
+    }
 
+    print('dumping result to file.')
     pickle.dump(all_pickle, open(output_dir + source_dir.replace('/', '') + '.pickle', 'wb'))
 
 
@@ -159,4 +175,4 @@ def read_data():
     matplot.show()
 
 
-read_data()
+# read_data()
