@@ -10,15 +10,15 @@ from sklearn.cluster import DBSCAN
 from minisom import MiniSom
 
 depth = 255.0
-# source_dir = "notMNIST_large/"
-# source_dir = "lfw-deepfunneled/"
+source_dir = "lfw-deepfunneled/"
+source_dir = "notMNIST_large/"
 source_dir = "notMNIST_small/"
 base_cache_dir = 'cache/'
 cache_dir = base_cache_dir + source_dir
 output_dir = 'dataset/'
 
 # must add to 1
-part = 1
+part = .7
 train = 0.4 * part
 test = 0.4 * part
 valid = 0.1 * part
@@ -193,8 +193,8 @@ def intersect(images1, images2, labels2):
         if (i % 100 == 0):
             print('.', end='')
         for j in keep2:
-            # if ((images1[i] == images2[j]).all()):
-            if (abs(np.mean(abs(images1[i] - images2[j]))) < diff):
+            # if (abs(np.mean(abs(images1[i] - images2[j]))) < diff):
+            if ((images1[i] == images2[j]).all()):
                 keep2.remove(j)
 
     indices = np.asarray(keep2)
@@ -272,7 +272,9 @@ def k_means():
 
     plt.show()
 
-# k_means()
+
+k_means()
+
 
 def make_average(labels, data):
     labels_data = []
@@ -325,7 +327,7 @@ def my_dbscan():
     plt.show()
 
 
-# my_dbscan()
+my_dbscan()
 
 
 def som():
@@ -366,5 +368,6 @@ def som():
         i = i + 1
 
     plt.show()
+
 
 som()
