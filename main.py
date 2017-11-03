@@ -6,7 +6,6 @@ import numpy as np
 import pickle
 
 from sklearn.cluster import DBSCAN
-from sklearn import metrics
 
 from minisom import MiniSom
 
@@ -19,7 +18,7 @@ cache_dir = base_cache_dir + source_dir
 output_dir = 'dataset/'
 
 # must add to 1
-part = .3
+part = 1
 train = 0.4 * part
 test = 0.4 * part
 valid = 0.1 * part
@@ -257,9 +256,6 @@ def k_means():
     in_data = np.reshape(in_data, (len(in_data), img_dims * img_dims))
 
     compactness, label, centers = cv2.kmeans(in_data, num_labels, None, criteria, 10, flags)
-    # print(compactness, label, centers)
-    # Now separate the data, Note the flatten()
-
 
     i = 1
     for img in centers:
@@ -275,7 +271,6 @@ def k_means():
         i = i + 1
 
     plt.show()
-
 
 # k_means()
 
@@ -337,25 +332,30 @@ def som():
     data = pickle.load(open(output_dir + source_dir.replace('/', '') + '-intersect-' + str(part) + '.pickle', 'rb'))
     train_data = data['train_data']
     train_labels = data['train_labels']
+    test_data = data['test_data']
+    test_labels = data['test_labels']
     img_dims = len(train_data[0])
-    som = MiniSom(2, 5, img_dims * img_dims, sigma=0.3, learning_rate=0.5)  # initialization of 6x6 SOM
+    som = MiniSom(2, 5, img_dims * img_dims, sigma=0.3, learning_rate=0.5)
+
     print("Training...")
     train_data = np.reshape(train_data, [len(train_data), img_dims * img_dims])
-    som.train_random(train_data, 100)  # trains the SOM with 100 iterations
+    som.train_batch(train_data, len(train_data))
+    som.train_random(train_data, 100)
     print("...ready!")
 
+    test_data = np.reshape(test_data, [len(test_data), img_dims * img_dims])
     labels = []
-    for img in train_data:
+    for img in test_data:
         x = som.winner(img)
-        print(x)
+        # print(x)
         labels.append(x[0] * 5 + x[1])
 
-    centers = make_average(labels, train_data)
+    centers = make_average(labels, test_data)
     num_labels = len(centers)
     i = 1
     for img in centers:
         plt.subplot(num_labels, 2, i)
-        closest, label = find_closest(img, train_data, train_labels)
+        closest, label = find_closest(img, test_data, test_labels)
         img = np.reshape(img, (img_dims, img_dims))
         closest = np.reshape(closest, (img_dims, img_dims))
         plt.imshow(closest)
@@ -366,7 +366,5 @@ def som():
         i = i + 1
 
     plt.show()
-
-
 
 som()
