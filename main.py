@@ -9,18 +9,22 @@ from sklearn.cluster import DBSCAN
 
 from minisom import MiniSom
 
+from sklearn.neural_network import MLPClassifier
+
+from sklearn import svm
+
 depth = 255.0
 source_dir = "lfw-deepfunneled/"
-source_dir = "notMNIST_large/"
 source_dir = "notMNIST_small/"
+source_dir = "notMNIST_large/"
 base_cache_dir = 'cache/'
 cache_dir = base_cache_dir + source_dir
 output_dir = 'dataset/'
 
 # must add to 1
-part = .7
+part = .1
 train = 0.4 * part
-test = 0.4 * part
+test = 0.1 * part
 valid = 0.1 * part
 
 numlabels = 0
@@ -88,21 +92,21 @@ def pickle_join_labels():
     all_labels = []
     print('start dataset creation')
     dirs = os.scandir(cache_dir)
+    label = 0
     for filename in dirs:
         print('adding: ' + filename.name)
         pickle_data = pickle.load(open(cache_dir + filename.name, 'rb'))
-        label = filename.name.replace('.pickle', '')
         all_data.extend(pickle_data)
         labels = np.repeat(np.atleast_1d(label), len(pickle_data), axis=0)
         all_labels.extend(labels)
+        label = label + 1
 
         print('dumping')
     pickle.dump(all_data, open(base_cache_dir + source_dir.replace('/', '') + '_data.pickle', 'wb'))
     pickle.dump(all_labels, open(base_cache_dir + source_dir.replace('/', '') + '_labels.pickle', 'wb'))
-
+    print(all_labels)
 
 pickle_join_labels()
-
 
 # PICKE ALL TO ONE
 def pickle_letters_to_dataset():
@@ -129,9 +133,9 @@ def pickle_letters_to_dataset():
     train_data = all_data[:int(train * data_size), :, :]
     train_labels = all_labels[:int(train * data_size)]
     test_data = all_data[(int(train * data_size) + 1):(int((train + test) * data_size)), :, :]
-    test_labels = all_data[(int(train * data_size) + 1):(int((train + test) * data_size))]
+    test_labels = all_labels[(int(train * data_size) + 1):(int((train + test) * data_size))]
     valid_data = all_data[(int((train + test) * data_size) + 1): (int((train + test + valid) * data_size)), :, :]
-    valid_labels = all_data[(int(((train + test) * data_size)) + 1):(int((train + test + valid) * data_size))]
+    valid_labels = all_labels[(int(((train + test) * data_size)) + 1):(int((train + test + valid) * data_size))]
 
     all_pickle = {
         'train_data': train_data,
@@ -183,7 +187,7 @@ def read_data():
 
 # ZADANIE 2
 
-diff = 0.0001
+diff = 0.01
 
 
 def intersect(images1, images2, labels2):
@@ -193,8 +197,8 @@ def intersect(images1, images2, labels2):
         if (i % 100 == 0):
             print('.', end='')
         for j in keep2:
-            # if (abs(np.mean(abs(images1[i] - images2[j]))) < diff):
-            if ((images1[i] == images2[j]).all()):
+            if (abs(np.mean(abs(images1[i] - images2[j]))) < diff):
+                # if ((images1[i] == images2[j]).all()):
                 keep2.remove(j)
 
     indices = np.asarray(keep2)
@@ -273,7 +277,7 @@ def k_means():
     plt.show()
 
 
-k_means()
+# k_means()
 
 
 def make_average(labels, data):
@@ -327,7 +331,7 @@ def my_dbscan():
     plt.show()
 
 
-my_dbscan()
+# my_dbscan()
 
 
 def som():
@@ -370,4 +374,136 @@ def som():
     plt.show()
 
 
-som()
+# som()
+
+
+
+def mlp(numData, layers):
+    # data = pickle.load(open(output_dir + source_dir.replace('/', '') + '-' + str(part) + '.pickle', 'rb'))
+    data = pickle.load(open(output_dir + source_dir.replace('/', '') + '-intersect-' + str(part) + '.pickle', 'rb'))
+    train_data = data['train_data'][0:numData]
+    train_labels = data['train_labels'][0:numData]
+    test_data = data['test_data']
+    test_labels = data['test_labels']
+    img_dims = len(train_data[0])
+    train_data = np.reshape(train_data, [len(train_data), img_dims * img_dims])
+    test_data = np.reshape(test_data, [len(test_data), img_dims * img_dims])
+
+    print('MLP ' + str(layers) + ' ' + str(numData))
+    clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=layers, random_state=1)
+    clf.fit(train_data, train_labels)
+    # MLPClassifier(activation='relu', alpha=1e-05, batch_size='auto',
+    #               beta_1=0.9, beta_2=0.999, early_stopping=False,
+    #               epsilon=1e-08, hidden_layer_sizes=(30, 30), learning_rate='constant',
+    #               learning_rate_init=0.001, max_iter=200, momentum=0.9,
+    #               nesterovs_momentum=True, power_t=0.5, random_state=1, shuffle=True,
+    #               solver='lbfgs', tol=0.0001, validation_fraction=0.1, verbose=False,
+    #               warm_start=False)
+
+    print('predicting...')
+
+    labels = clf.predict(test_data)
+    correct = np.count_nonzero(labels == test_labels)
+
+    print(correct / len(labels))
+
+
+# mlp(50, 784)
+# mlp(100, 784)
+# mlp(1000, 784)
+# mlp(5000, 784)
+# mlp(20000, 784)
+
+# # mlp(50, (784, 784))
+# mlp(100, (784, 784))
+# mlp(1000, (784, 784))
+# # mlp(5000, (784, 784))
+# mlp(20000, (784, 784))
+#
+
+mlp(50, 12)
+mlp(100, 12)
+mlp(1000, 12)
+mlp(5000, 12)
+mlp(20000, 12)
+
+
+#
+# mlp(50, 50)
+# mlp(100, 50)
+# mlp(1000, 50)
+# mlp(5000, 50)
+# mlp(20000, 50)
+#
+# mlp(50, 100)
+# mlp(100, 100)
+# mlp(1000, 100)
+# mlp(5000, 100)
+# mlp(20000, 100)
+#
+# mlp(50, (30, 30))
+# mlp(100, (30, 30))
+# mlp(1000, (30, 30))
+# mlp(5000, (30, 30))
+# mlp(20000, (30, 30))
+#
+# mlp(50, (50, 50))
+# mlp(100, (50, 50))
+# mlp(1000, (50, 50))
+# mlp(5000, (50, 50))
+# mlp(20000, (50, 50))
+#
+# mlp(50, (100, 100))
+# mlp(100, (100, 100))
+# mlp(1000, (100, 100))
+# mlp(5000, (100, 100))
+# mlp(20000, (100, 100))
+
+
+def my_svm(numData, kernel):
+    # data = pickle.load(open(output_dir + source_dir.replace('/', '') + '-' + str(part) + '.pickle', 'rb'))
+    data = pickle.load(open(output_dir + source_dir.replace('/', '') + '-intersect-' + str(part) + '.pickle', 'rb'))
+
+    train_data = data['train_data'][0:numData]
+    train_labels = data['train_labels'][0:numData]
+    test_data = data['test_data']
+    test_labels = data['test_labels']
+    img_dims = len(train_data[0])
+    train_data = np.reshape(train_data, [len(train_data), img_dims * img_dims])
+    test_data = np.reshape(test_data, [len(test_data), img_dims * img_dims])
+
+    print('SVM ' + kernel + ' ' + str(numData))
+
+    clf = svm.SVC(kernel=kernel)
+    # clf = svm.SVC(kernel='linear')
+    # clf = svm.SVC(kernel='sigmoid')
+    clf.fit(train_data, train_labels)
+    # SVC(C=1.0, cache_size=200, class_weight=None, coef0=0.0,
+    #     decision_function_shape='ovr', degree=3, gamma='auto', kernel='rbf',
+    #     max_iter=-1, probability=False, random_state=None, shrinking=True,
+    #     tol=0.001, verbose=False)
+
+    print('predicting...')
+
+    labels = clf.predict(test_data)
+    correct = np.count_nonzero(labels == test_labels)
+
+    print(correct / len(labels))
+
+# # my_svm(50, 'linear')
+# my_svm(100, 'rbf')
+# my_svm(1000, 'rbf')
+# # my_svm(5000, 'linear')
+# my_svm(20000, 'rbf')
+#
+# # my_svm(50, 'linear')
+# my_svm(100, 'linear')
+# my_svm(1000, 'linear')
+# # my_svm(5000, 'linear')
+# my_svm(20000, 'linear')
+#
+# my_svm(50, 'sigmoid')
+# my_svm(100, 'sigmoid')
+# my_svm(1000, 'sigmoid')
+# my_svm(5000, 'sigmoid')
+# my_svm(20000, 'sigmoid')
