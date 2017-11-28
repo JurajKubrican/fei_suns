@@ -15,14 +15,14 @@ from sklearn import svm
 
 depth = 255.0
 source_dir = "lfw-deepfunneled/"
-source_dir = "notMNIST_small/"
 source_dir = "notMNIST_large/"
+source_dir = "notMNIST_small/"
 base_cache_dir = 'cache/'
 cache_dir = base_cache_dir + source_dir
 output_dir = 'dataset/'
 
 # must add to 1
-part = .1
+part = 1
 train = 0.4 * part
 test = 0.1 * part
 valid = 0.1 * part
