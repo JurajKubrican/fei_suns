@@ -52,6 +52,7 @@ def accuracy(predictions, labels):
     return (100.0 * np.sum(np.argmax(predictions, 1) == np.argmax(labels, 1))
             / predictions.shape[0])
 
+
 ### DROPOUT
 
 batch_size = 128
@@ -80,15 +81,15 @@ with graph.as_default():
         tf.truncated_normal([hiden_layer, num_labels]))
     biasesOut = tf.Variable(tf.zeros([num_labels]))
 
-    #logits?
+    # logits?
     drop = tf.nn.dropout(trainIn, 0.5)
 
     logits = tf.matmul(drop, weightsOut) + biasesOut
 
     loss = tf.reduce_mean(
         tf.nn.softmax_cross_entropy_with_logits(labels=tf_train_labels, logits=logits))
-           # l2Regular * \
-           # (tf.nn.l2_loss(weightsIn) + tf.nn.l2_loss(weightsIn))
+    # l2Regular * \
+    # (tf.nn.l2_loss(weightsIn) + tf.nn.l2_loss(weightsIn))
 
     # Optimizer.
     optimizer = tf.train.GradientDescentOptimizer(0.5).minimize(loss)
@@ -96,13 +97,11 @@ with graph.as_default():
     # Predictions for the training, validation, and test data.
     train_prediction = tf.nn.softmax(logits)
 
-
     validIn = tf.nn.relu(tf.matmul(tf_valid_dataset, weightsIn) + biasesIn)
     valid_prediction = tf.nn.softmax(tf.matmul(validIn, weightsOut) + biasesOut)
 
     testIn = tf.nn.relu(tf.matmul(tf_test_dataset, weightsIn) + biasesIn)
     test_prediction = tf.nn.softmax(tf.matmul(testIn, weightsOut) + biasesOut)
-
 
 num_steps = 301
 
@@ -123,8 +122,6 @@ with tf.Session(graph=graph) as session:
         _, l, predictions = session.run(
             [optimizer, loss, train_prediction], feed_dict=feed_dict)
         if (step % 10 == 0):
-            print("Minibatch loss at step %d: %f" % (step, l))
-            print("Minibatch accuracy: %.1f%%" % accuracy(predictions, batch_labels))
-            print("Validation accuracy: %.1f%%" % accuracy(
+            print("%.1f%%" % accuracy(
                 valid_prediction.eval(), valid_labels))
     print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))

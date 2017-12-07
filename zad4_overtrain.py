@@ -122,8 +122,6 @@ with tf.Session(graph=graph) as session:
         _, l, predictions = session.run(
             [optimizer, loss, train_prediction], feed_dict=feed_dict)
         if (step % 10 == 0):
-            print("Minibatch loss at step %d: %f" % (step, l))
-            print("Minibatch accuracy: %.1f%%" % accuracy(predictions, batch_labels))
-            print("Validation accuracy: %.1f%%" % accuracy(
+            print("%.1f%%" % accuracy(
                 valid_prediction.eval(), valid_labels))
     print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))

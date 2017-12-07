@@ -7,3 +7,4 @@ notMNIST_large
 *.tar
 *.tgz
 git pull
+*.zip
