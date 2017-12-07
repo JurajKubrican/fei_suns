@@ -86,7 +86,7 @@ with graph.as_default():
     logits = tf.matmul(drop, weightsOut) + biasesOut
 
     loss = tf.reduce_mean(
-        tf.nn.softmax_cross_entropy_with_logits(labels=tf_train_labels, logits=logits)) 
+        tf.nn.softmax_cross_entropy_with_logits(labels=tf_train_labels, logits=logits))
            # l2Regular * \
            # (tf.nn.l2_loss(weightsIn) + tf.nn.l2_loss(weightsIn))
 
