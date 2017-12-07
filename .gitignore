@@ -6,5 +6,4 @@ notMNIST_large
 .idea
 *.tar
 *.tgz
-git pull
 *.zip
