@@ -11,6 +11,7 @@ from six.moves import range
 
 pickle_file = './dataset/notMNIST_small-0.1.pickle'
 pickle_file = './dataset/notMNIST_small-1.pickle'
+pickle_file = './dataset/notMNIST_large-0.3.pickle'
 
 with open(pickle_file, 'rb') as f:
     save = pickle.load(f)
@@ -43,7 +44,7 @@ print('Training set', train_dataset.shape, train_labels.shape)
 print('Validation set', valid_dataset.shape, valid_labels.shape)
 print('Test set', test_dataset.shape, test_labels.shape)
 
-train_subset = 100000
+train_subset = 5000
 
 
 def accuracy(predictions, labels):
@@ -142,5 +143,5 @@ with tf.Session(graph=graph) as session:
             print("Minibatch accuracy: %.1f%%" % accuracy(predictions, batch_labels))
             print("Validation accuracy: %.1f%%" % accuracy(
                 valid_prediction.eval(), valid_labels))
-    print(reluNum)
+    print(train_subset)
     print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))

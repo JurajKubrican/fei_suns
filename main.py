@@ -15,15 +15,15 @@ from sklearn import svm
 
 depth = 255.0
 source_dir = "lfw-deepfunneled/"
-source_dir = "notMNIST_large/"
 source_dir = "notMNIST_small/"
+source_dir = "notMNIST_large/"
 base_cache_dir = 'cache/'
 cache_dir = base_cache_dir + source_dir
 output_dir = 'dataset/'
 
 # must add to 1
-part = 1
-train = 0.4 * part
+part = 0.3
+train = 0.8 * part
 test = 0.1 * part
 valid = 0.1 * part
 
@@ -197,8 +197,8 @@ def intersect(images1, images2, labels2):
         if (i % 100 == 0):
             print('.', end='')
         for j in keep2:
-            if (abs(np.mean(abs(images1[i] - images2[j]))) < diff):
-                # if ((images1[i] == images2[j]).all()):
+            # if (abs(np.mean(abs(images1[i] - images2[j]))) < diff):
+            if ((images1[i] == images2[j]).all()):
                 keep2.remove(j)
 
     indices = np.asarray(keep2)
