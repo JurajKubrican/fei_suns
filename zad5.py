@@ -85,7 +85,7 @@ with graph.as_default():
 
     # FC Layer 1
     fc_weights_1 = tf.Variable(tf.truncated_normal(
-        [image_size // 4 * image_size // 4 * depth, hiden_layer], stddev=0.1))
+        [7*7*12, hiden_layer], stddev=0.1))
     fc_biases_1 = tf.Variable(tf.constant(1.0, shape=[hiden_layer]))
 
     # FC Layer 2
